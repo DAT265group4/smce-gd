@@ -38,7 +38,7 @@ func get_speed() -> float:
 func _physics_process(delta) -> void:
         if !enabled:
                 break;
-	    if ! target:
+	    if !target:
 	            return;
 	    #supposedly it will be casted to spatial
         var node = get_node(target)
