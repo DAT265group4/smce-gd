@@ -15,7 +15,6 @@
 #  limitations under the License.
 #
 
-
 extends Spatial
 
 var rot_x = 0
@@ -84,6 +83,7 @@ func _process(delta: float) -> void:
 		return
 	global_transform.origin = target.global_transform.origin + target.global_transform.basis.xform((Vector3.UP) * _zoom)
 	look_at(target.global_transform.origin, Vector3.UP)
+
 
 
 
