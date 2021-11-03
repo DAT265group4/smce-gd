@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package >
+    <metadata>
+        <id>SMCE-NugetPackage</id>
+		<authors>Atiye Etemadi</authors>
+		<version>2021.11.03</version>
+        <description>SMCE-GD(frontend)</description>
+        <tags>SMCE, smce-gd</tags>
+    </metadata>
+     
+    <files>
+        <file src="debian\*"       target="smce-gd\debian"/>
+        <file src="include\**\*.*"   target="smce-gd\include" />
+        <file src="CMake\**\*.*"            target="smce-gd\CMake"/>
+        <file src="project\**\*.*"            target="smce-gd\project"/>
+        <file src="src\**\*.*"            target="smce-gd\src"/>
+        <file src="README.md"        target="smce-gd"/>
+        <file src="CMakeLists.txt"        target="smce-gd"/>
+        <file src="CONTRIBUTING.md"        target="smce-gd"/>
+        <file src="LICENSE"        target="smce-gd"/>
+        <file src="Smce-gdPackaging.props"   target="smce-gd"/>
+		<file src="binding_generator_ext.py"        target="smce-gd\others"/>
+		<file src="main.cpp"        target="smce-gd\others"/>
+        <file src="PKGBUILD"        target="smce-gd\others"/>
+        <file src="smce_gd.desktop"        target="smce-gd\desktop"/>
+        <file src="smce_gd-bin.install"        target="smce-gd\bin"/>
+
+		
+	</files>
+</package>
