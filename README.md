@@ -32,6 +32,18 @@ _note: we bundle the shared lib of SMCE on export_
 * `godot --path project/`
 * Or open up the project folder in the _Godot editor_ and start from there.
 
+###  Nuget Packaging
+
+For calling the Nuget pack:
+
+- Put the Nuget.exe in the path
+- Run bellow command in cmd:
+```shell
+Nuget.exe pack <Frontend project folder name>\Smce-gd.nuspec -NoDefaultExcludes -OutputDirectory builds\nuget
+```
+- `SMCE-NugetPackage.2021.11.3.nupkg` should be created under builds\nuget
+
+
 ### Credits
 
 Copyright ItJustWorks™, Apache 2.0 licensed  
