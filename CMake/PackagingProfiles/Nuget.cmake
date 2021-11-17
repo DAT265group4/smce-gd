@@ -1,5 +1,5 @@
 #
-#  PackagingProfiles/WiX.cmake
+#  PackagingProfiles/Nuget.cmake
 #  Copyright 2021 ItJustWorksTM
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,10 @@
 #  limitations under the License.
 #
 
-set (CPACK_GENERATOR WIX)
-set (CPACK_WIX_UPGRADE_GUID 0602a6db-61aa-4440-80f9-547cec5db5b9)
-set (CPACK_WIX_ROOT_FEATURE_TITLE "SMCE Godot")
-set (CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/project/media/images/icon.png")
-include(CPack)
 
+set (CPACK_GENERATOR NuGET)
+set (CPACK_NUGET_PACKAGE_NAME  "NugetPackage-Smce-x86_64")
+set (CPACK_NUGET_PACKAGE_VERSION  "1.0")
+set (CPACK_NUGET_PACKAGE_AUTHORS "Atiye Etemadi")
+set(CPACK_NUGET_PACKAGE_DESCRIPTION "This is the Frontend application ")
+include(CPack)
