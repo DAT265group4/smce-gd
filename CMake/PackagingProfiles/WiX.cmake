@@ -19,5 +19,5 @@ set (CPACK_GENERATOR WIX)
 set (CPACK_WIX_UPGRADE_GUID 0602a6db-61aa-4440-80f9-547cec5db5b9)
 set (CPACK_WIX_ROOT_FEATURE_TITLE "SMCE Godot")
 set (CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/project/media/images/icon.png")
-include(CPack)
+#include(CPack)
 
