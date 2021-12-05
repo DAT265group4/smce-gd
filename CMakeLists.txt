@@ -150,6 +150,10 @@ if (NOT APPLE)
         install (FILES "${SMCE_DYNLIB_FILE}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/smce")
     endif ()
 
+    if (SMCE_CPACK_PROFILE STREQUAL "Templates/Fedora")
+        file (CREATE_LINK "../${CMAKE_INSTALL_LIBDIR}/smce/smce_gd${CMAKE_EXECUTABLE_SUFFIX}" "${PROJECT_BINARY_DIR}/smce_gd" SYMBOLIC)
+        install (FILES "${PROJECT_BINARY_DIR}/smce_gd" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    endif ()
 else ()
     install (CODE "
         execute_process (COMMAND \"\${GODOT_EXECUTABLE}\" --no-window --export${GODOT_DEBUG_ARG} \"${GODOT_PLATFORM}\" \"${PROJECT_BINARY_DIR}/export/SMCE-Godot\"

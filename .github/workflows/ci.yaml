@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
-      build_linux: ${{ true }}
-      build_macos: ${{ true }}
-      build_windows: ${{ true }}
+      build_linux: ${{ false }}
+      build_macos: ${{ false }}
+      build_windows: ${{ false }}
       platform_package: ${{ steps.changed_files.outputs.any_changed == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) }}
     steps:
       - uses: actions/checkout@v2
@@ -278,7 +278,7 @@ jobs:
   package-deb:
     name: Package per-distro DEBs (${{ matrix.os.name }} ${{ matrix.os.codename }})
     needs: rules
-    if: needs.rules.outputs.platform_package == 'true'
+    if: needs.rules.outputs.platform_package == 'true' && false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -369,3 +369,108 @@ jobs:
         with:
           name: SMCE_gd-DEB-${{ matrix.os.name }}${{ matrix.os.codename }}
           path: build/*.deb
+  package-rpm:
+    name: Package per-distro RPMs (${{ matrix.os.name }} ${{ matrix.os.codename }})
+    needs: rules
+    if: needs.rules.outputs.platform_package == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: Fedora
+            codename: 33
+            image: fedora:33
+            profile: FedoraHost
+            slug: .fc33
+          - name: Fedora
+            codename: 34
+            image: fedora:34
+            profile: FedoraHost
+            slug: .fc34
+          - name: Fedora
+            codename: 35
+            image: fedora:35
+            profile: FedoraHost
+            slug: .fc35
+#          - name: Fedora
+#            codename: Rawhide
+#            image: fedora:rawhide
+#            profile: FedoraHost
+#            slug: .fc36
+          - name: openSUSE
+            codename: Tumbleweed
+            image: opensuse/tumbleweed
+            profile: FedoraHost
+            slug: ''
+          - name: OpenMandriva
+            codename: Lx4.2
+            image: openmandriva/4.2
+            profile: FedoraHost
+            slug: -omv4002
+    container:
+      image: ${{ matrix.os.image }}
+      options: --security-opt seccomp=unconfined
+    steps:
+      - name: Setup workdir
+        run: mkdir /tmp/wk && cd /tmp/wk
+      - name: Fetch deps
+        id: deps
+        run: |
+          if [[ '${{ matrix.os.name }}' == 'Fedora' ]]; then
+            dnf install -y wget godot-headless tar git cmake rpmdevtools rpmlint ninja-build gcc-c++
+            echo "::set-output name=GODOT_VERSION::$(godot-headless --version | grep -oP '^\d+\.\d+(\.\d+)?\.\w+')"
+          elif [[ '${{ matrix.os.name }}' == 'openSUSE' ]]; then
+            zypper install -y dnf rpm-repos-openSUSE
+            zypper install -y wget godot-headless tar git cmake rpmdevtools rpm-build rpmlint ninja gcc-c++
+            echo "::set-output name=GODOT_VERSION::$(godot-headless --version | grep -oP '^\d+\.\d+(\.\d+)?\.\w+')"
+          elif [[ '${{ matrix.os.name }}' == 'OpenMandriva' ]]; then
+            dnf install -y dnf-plugin-config-manager
+            dnf config-manager --enable rock-x86_64-unsupported rock-updates-x86_64-unsupported
+            dnf install -y wget godot-server tar git cmake rpmdevtools rpm-build rpmlint ninja gcc-c++ glibc-devel
+            echo "::set-output name=GODOT_VERSION::$(godot-server --version | grep -oP '^\d+\.\d+(\.\d+)?\.\w+')"
+          fi
+          echo "::set-output name=GODOT_TEMPLATE_CACHE_KEY::$(echo "$GODOT_EXPORT_TEMPLATE_VERSION" | sed 's/\.//g')"
+          wget "https://github.com/ItJustWorksTM/libSMCE/releases/download/${{ env.LIBSMCE_TAG }}/libsmce-${{ env.LIBSMCE_VERSION }}-1${{ matrix.os.slug }}.x86_64.rpm"
+          wget "https://github.com/ItJustWorksTM/libSMCE/releases/download/${{ env.LIBSMCE_TAG }}/libsmce-devel-${{ env.LIBSMCE_VERSION }}-1${{ matrix.os.slug }}.x86_64.rpm"
+          wget "https://github.com/ItJustWorksTM/libSMCE/releases/download/${{ env.LIBSMCE_TAG }}/libsmce-static-${{ env.LIBSMCE_VERSION }}-1${{ matrix.os.slug }}.x86_64.rpm"
+          dnf install -y ./*.rpm
+      - name: Cache Godot export template
+        uses: actions/cache@v2
+        id: cache-godot
+        with:
+          path: |
+            ~/.local/share/godot/templates/${{ steps.deps.outputs.GODOT_VERSION }}
+          key: godot-${{ steps.deps.outputs.GODOT_TEMPLATE_CACHE_KEY }}-linux_64
+      - name: Get export templates
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          wget -c "https://downloads.tuxfamily.org/godotengine/${GODOT_EXPORT_TEMPLATE_VERSION}/Godot_v${GODOT_EXPORT_TEMPLATE_VERSION}-stable_export_templates.tpz" -O godot_export.tpz
+          unzip godot_export.tpz
+          mkdir -p ~/.local/share/godot/templates/${{ steps.deps.outputs.GODOT_VERSION }}
+          mv templates/linux_x11_64* ~/.local/share/godot/templates/${{ steps.deps.outputs.GODOT_VERSION }}
+      - uses: actions/checkout@v2
+      - name: CMake Configure
+        run: cmake -G Ninja -DSMCE_BUILD_PROFILE=${{ matrix.os.profile }} -S ./ -B ./build
+      - name: CMake Build
+        run: cmake --build ./build
+      - name: CPack
+        run: cmake --build ./build --target package
+      - name: rpmlint
+        run: rpmlint ./build/*.rpm || true
+      - name: Test installation
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ${{ matrix.os.image }}
+          options: -v ${{ github.workspace }}:/host --security-opt seccomp=unconfined
+          run: |
+            [[ '${{ matrix.os.name }}' == 'openSUSE' ]] && zypper install -y dnf rpm-repos-openSUSE || true
+            dnf install -y which
+            dnf install -y /host/libsmce-${{ env.LIBSMCE_VERSION }}-1${{ matrix.os.slug }}.x86_64.rpm
+            dnf install -y /host/build/*.rpm
+            ldd $(which smce_gd)
+      - name: Upload artifacts
+        uses: 'actions/upload-artifact@v2'
+        with:
+          name: libSMCE-RPM-${{ matrix.os.name }}${{ matrix.os.codename }}
+          path: build/*.rpm
