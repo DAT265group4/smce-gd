@@ -677,7 +677,7 @@ _global_script_classes=[ {
 "base": "",
 "class": "Result",
 "language": "NativeScript",
-"path": "res://src/files/Result.gdns"
+"path": "res://tests/files/Result.gdns"
 }, {
 "base": "RichTextEffect",
 "class": "RichTextEffectBackground",
@@ -992,7 +992,7 @@ window/size/height=720
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/gdUnit3/plugin.cfg" )
+enabled=PoolStringArray(  )
 
 [gui]
 
