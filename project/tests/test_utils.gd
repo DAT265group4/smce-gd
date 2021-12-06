@@ -39,7 +39,7 @@ func test_read_json_file():
 func test_err():
 	var error = Util.err("This is an error. Duh!")
 	print(error)
-	assert(error is Reference)
+	assert(!error.ok())
 
 
 func test_mkdir():
