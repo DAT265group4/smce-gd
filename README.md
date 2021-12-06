@@ -31,13 +31,14 @@ Initially created to emulate cars supporting the [smartcar_shield](https://githu
 ```shell
 mkdir build
 cmake -B build
+cmake --build build --config Release
 cmake --build build --target godot-smce
 ```
 
 
 Packaging is done using _CPack_.  
 _note: we bundle the shared lib of SMCE on export_
-
+godot
 ### Running
 
 * `godot --path project/`
